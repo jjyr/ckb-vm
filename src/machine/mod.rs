@@ -16,6 +16,7 @@ use super::{
 use bytes::Bytes;
 use goblin::elf::program_header::{PF_R, PF_W, PF_X, PT_LOAD};
 use goblin::elf::{Elf, Header};
+use log::trace;
 use std::fmt::{self, Display};
 
 fn elf_bits(header: &Header) -> Option<u8> {
@@ -366,20 +367,25 @@ impl<Inner: CoreMachine> Display for DefaultMachine<'_, Inner> {
 impl<'a, Inner: SupportMachine> DefaultMachine<'a, Inner> {
     pub fn load_program(&mut self, program: &Bytes, args: &[Bytes]) -> Result<u64, Error> {
         let elf_bytes = self.load_elf(program, true)?;
+        trace!("load ELF ...... OK");
         for syscall in &mut self.syscalls {
             syscall.initialize(&mut self.inner)?;
         }
+        trace!("initialize syscalls ...... OK");
         if let Some(debugger) = &mut self.debugger {
             debugger.initialize(&mut self.inner)?;
+            trace!("initialize debugger ...... OK");
         }
         let stack_bytes = self.initialize_stack(
             args,
             (RISCV_MAX_MEMORY - DEFAULT_STACK_SIZE) as u64,
             DEFAULT_STACK_SIZE as u64,
         )?;
+        trace!("initialize stack ...... OK");
         let bytes = elf_bytes
             .checked_add(stack_bytes)
             .ok_or(Error::Unexpected)?;
+        trace!("load program bytes: {}", bytes);
         Ok(bytes)
     }
 
