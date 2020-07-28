@@ -117,7 +117,12 @@ pub trait SupportMachine: CoreMachine {
                 if slice_start > slice_end || slice_end > program.len() as u64 {
                     return Err(Error::OutOfBound);
                 }
-                trace!("load elf - init pages start {} size {} flags: {}", aligned_start, size, program_header.p_flags);
+                trace!(
+                    "load elf - init pages start {} size {} flags: {}",
+                    aligned_start,
+                    size,
+                    program_header.p_flags
+                );
                 self.memory_mut().init_pages(
                     aligned_start,
                     size,
@@ -125,7 +130,11 @@ pub trait SupportMachine: CoreMachine {
                     Some(program.slice(slice_start as usize..slice_end as usize)),
                     padding_start,
                 )?;
-                trace!("load elf - store memory start {} padding start {}", aligned_start, padding_start);
+                trace!(
+                    "load elf - store memory start {} padding start {}",
+                    aligned_start,
+                    padding_start
+                );
                 self.memory_mut()
                     .store_byte(aligned_start, padding_start, 0)?;
                 bytes = bytes

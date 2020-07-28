@@ -6,6 +6,7 @@ use super::{
 
 use bytes::Bytes;
 use std::marker::PhantomData;
+use log::debug;
 
 pub struct WXorXMemory<R: Register, M: Memory<R>> {
     inner: M,
@@ -38,6 +39,13 @@ impl<R: Register, M: Memory<R>> Memory<R> for WXorXMemory<R, M> {
         source: Option<Bytes>,
         offset_from_addr: u64,
     ) -> Result<(), Error> {
+        debug!(
+            "addr: {} rounded: {}, size: {} rounded: {}",
+            addr,
+            round_page_down(addr),
+            size,
+            round_page_up(size)
+        );
         if round_page_down(addr) != addr || round_page_up(size) != size {
             return Err(Error::Unaligned);
         }
